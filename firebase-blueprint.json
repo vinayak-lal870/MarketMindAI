@@ -1,0 +1,312 @@
+{
+  "entities": {
+    "UserAccount": {
+      "title": "UserAccount",
+      "description": "Founder account metadata and preferred language settings scoped strictly to the authenticated user.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the account owner.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Display name of the founder.",
+          "minLength": 0,
+          "maxLength": 120
+        },
+        "preferredLanguage": {
+          "type": "string",
+          "description": "Selected interface and Gemini generation language code.",
+          "enum": ["en", "hi", "te", "ta", "mr"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the account record was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the account record was last updated."
+        }
+      },
+      "required": ["uid", "displayName", "preferredLanguage", "createdAt", "updatedAt"]
+    },
+    "BusinessDna": {
+      "title": "BusinessDna",
+      "description": "Private Business DNA memory profile for a founder's D2C or SMB brand.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the founder owning this Business DNA.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "brandName": {
+          "type": "string",
+          "description": "Brand or company name.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "category": {
+          "type": "string",
+          "description": "Business industry or D2C category.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "productDescription": {
+          "type": "string",
+          "description": "Core products, hero SKUs, and value proposition.",
+          "minLength": 1,
+          "maxLength": 1200
+        },
+        "targetAudience": {
+          "type": "string",
+          "description": "Primary customer demographic, geography, and buying behavior.",
+          "minLength": 1,
+          "maxLength": 600
+        },
+        "aovInr": {
+          "type": "number",
+          "description": "Average Order Value in Indian Rupees."
+        },
+        "grossMarginPct": {
+          "type": "number",
+          "description": "Gross margin percentage (1 to 99)."
+        },
+        "monthlyAdBudgetInr": {
+          "type": "number",
+          "description": "Monthly marketing/ad budget in Indian Rupees."
+        },
+        "competitorOne": {
+          "type": "string",
+          "description": "First key competitor name.",
+          "minLength": 0,
+          "maxLength": 120
+        },
+        "competitorTwo": {
+          "type": "string",
+          "description": "Second key competitor name.",
+          "minLength": 0,
+          "maxLength": 120
+        },
+        "preferredLanguage": {
+          "type": "string",
+          "description": "Founder's preferred language code.",
+          "enum": ["en", "hi", "te", "ta", "mr"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server update timestamp."
+        }
+      },
+      "required": [
+        "ownerId",
+        "brandName",
+        "category",
+        "productDescription",
+        "targetAudience",
+        "aovInr",
+        "grossMarginPct",
+        "monthlyAdBudgetInr",
+        "competitorOne",
+        "competitorTwo",
+        "preferredLanguage",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "OutcomeLedgerEntry": {
+      "title": "OutcomeLedgerEntry",
+      "description": "Saved strategic growth decision and execution outcome tracked by a founder.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the founder.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "title": {
+          "type": "string",
+          "description": "Concise title of the strategic growth decision.",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "sourceType": {
+          "type": "string",
+          "description": "Module from which the decision originated.",
+          "enum": ["Market Radar", "Daily Pulse", "What-If Simulator", "Peer Playbook", "Manual"]
+        },
+        "angleCategory": {
+          "type": "string",
+          "description": "Angle or focus area (e.g., Competitor Weakness, Best Offer Angle, Low-CAC Channel).",
+          "minLength": 0,
+          "maxLength": 80
+        },
+        "hypothesis": {
+          "type": "string",
+          "description": "Strategic rationale and expected growth hypothesis.",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "actionPlan": {
+          "type": "string",
+          "description": "Concrete execution steps for the team.",
+          "minLength": 0,
+          "maxLength": 1500
+        },
+        "status": {
+          "type": "string",
+          "description": "Current execution state.",
+          "enum": ["Planned", "In Progress", "Succeeded"]
+        },
+        "howImplemented": {
+          "type": "string",
+          "description": "Founder notes explaining how the decision was executed.",
+          "minLength": 0,
+          "maxLength": 2000
+        },
+        "actualResult": {
+          "type": "string",
+          "description": "Verified numeric outcome achieved.",
+          "minLength": 0,
+          "maxLength": 300
+        },
+        "sharedAnonymously": {
+          "type": "boolean",
+          "description": "Whether the anonymized win has been published to shared_playbooks."
+        },
+        "publishedPlaybookId": {
+          "type": "string",
+          "description": "ID of the resulting document in shared_playbooks if published.",
+          "minLength": 0,
+          "maxLength": 128
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server update timestamp."
+        }
+      },
+      "required": [
+        "ownerId",
+        "title",
+        "sourceType",
+        "angleCategory",
+        "hypothesis",
+        "actionPlan",
+        "status",
+        "howImplemented",
+        "actualResult",
+        "sharedAnonymously",
+        "publishedPlaybookId",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "SharedPlaybook": {
+      "title": "SharedPlaybook",
+      "description": "Collective anonymized playbook network storing verified Indian SMB/D2C wins without brand names or sensitive financials.",
+      "type": "object",
+      "properties": {
+        "authorUid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the contributor (kept opaque for integrity; no PII).",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "isAnonymized": {
+          "type": "boolean",
+          "description": "Must be true to confirm all brand names and financials were stripped."
+        },
+        "category": {
+          "type": "string",
+          "description": "Generalized D2C or SMB category.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "priceTier": {
+          "type": "string",
+          "description": "Generalized AOV tier.",
+          "enum": ["Mass (Under ₹499)", "Mid-Premium (₹500–₹1,499)", "Luxury (₹1,500+)"]
+        },
+        "strategySummary": {
+          "type": "string",
+          "description": "Anonymized summary of the winning strategy.",
+          "minLength": 1,
+          "maxLength": 450
+        },
+        "implementationSteps": {
+          "type": "array",
+          "description": "Bounded list (1 to 6) of anonymized execution steps."
+        },
+        "verifiedResult": {
+          "type": "string",
+          "description": "Verified percentage or relative outcome metric.",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "channel": {
+          "type": "string",
+          "description": "Primary growth channel utilized.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        }
+      },
+      "required": [
+        "authorUid",
+        "isAnonymized",
+        "category",
+        "priceTier",
+        "strategySummary",
+        "implementationSteps",
+        "verifiedResult",
+        "channel",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserAccount" },
+      "description": "Private user account document scoped strictly to request.auth.uid == userId."
+    },
+    "/users/{userId}/business_dna/{dnaId}": {
+      "schema": { "$ref": "#/entities/BusinessDna" },
+      "description": "Private Business DNA profile storing brand positioning, unit economics, and competitors."
+    },
+    "/users/{userId}/outcome_ledger/{entryId}": {
+      "schema": { "$ref": "#/entities/OutcomeLedgerEntry" },
+      "description": "Private Outcome Ledger tracking decisions, status transitions, and results."
+    },
+    "/shared_playbooks/{playbookId}": {
+      "schema": { "$ref": "#/entities/SharedPlaybook" },
+      "description": "Collective anonymized playbook network readable by authenticated founders and writable only by verified contributors."
+    }
+  }
+}

@@ -1,0 +1,242 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global safety net: default-deny all reads and writes unless explicitly matched below
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Reusable Hardened Primitives ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidLanguage(lang) {
+      return lang is string && lang.size() <= 10 && lang in ['en', 'hi', 'te', 'ta', 'mr'];
+    }
+
+    // --- Validation Blueprints ---
+    function isValidUserAccount(data) {
+      return data.keys().hasAll(['uid', 'displayName', 'preferredLanguage', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['uid', 'displayName', 'preferredLanguage', 'createdAt', 'updatedAt'])
+        && data.uid is string && data.uid.size() >= 1 && data.uid.size() <= 128
+        && data.uid.matches('^[a-zA-Z0-9_\\-]+$')
+        && data.uid == request.auth.uid
+        && data.displayName is string && data.displayName.size() <= 120
+        && isValidLanguage(data.preferredLanguage)
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidBusinessDna(data) {
+      return data.keys().hasAll([
+          'ownerId', 'brandName', 'category', 'productDescription', 'targetAudience',
+          'aovInr', 'grossMarginPct', 'monthlyAdBudgetInr', 'competitorOne',
+          'competitorTwo', 'preferredLanguage', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'ownerId', 'brandName', 'category', 'productDescription', 'targetAudience',
+          'aovInr', 'grossMarginPct', 'monthlyAdBudgetInr', 'competitorOne',
+          'competitorTwo', 'preferredLanguage', 'createdAt', 'updatedAt'
+        ])
+        && data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128
+        && data.ownerId.matches('^[a-zA-Z0-9_\\-]+$')
+        && data.ownerId == request.auth.uid
+        && data.brandName is string && data.brandName.size() >= 1 && data.brandName.size() <= 120
+        && data.category is string && data.category.size() >= 1 && data.category.size() <= 100
+        && data.productDescription is string && data.productDescription.size() >= 1 && data.productDescription.size() <= 1200
+        && data.targetAudience is string && data.targetAudience.size() >= 1 && data.targetAudience.size() <= 600
+        && data.aovInr is number && data.aovInr >= 1 && data.aovInr <= 10000000
+        && data.grossMarginPct is number && data.grossMarginPct >= 1 && data.grossMarginPct <= 99
+        && data.monthlyAdBudgetInr is number && data.monthlyAdBudgetInr >= 0 && data.monthlyAdBudgetInr <= 100000000
+        && data.competitorOne is string && data.competitorOne.size() <= 120
+        && data.competitorTwo is string && data.competitorTwo.size() <= 120
+        && isValidLanguage(data.preferredLanguage)
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidOutcomeLedgerEntry(data) {
+      return data.keys().hasAll([
+          'ownerId', 'title', 'sourceType', 'angleCategory', 'hypothesis',
+          'actionPlan', 'status', 'howImplemented', 'actualResult',
+          'sharedAnonymously', 'publishedPlaybookId', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'ownerId', 'title', 'sourceType', 'angleCategory', 'hypothesis',
+          'actionPlan', 'status', 'howImplemented', 'actualResult',
+          'sharedAnonymously', 'publishedPlaybookId', 'createdAt', 'updatedAt'
+        ])
+        && data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128
+        && data.ownerId.matches('^[a-zA-Z0-9_\\-]+$')
+        && data.ownerId == request.auth.uid
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 180
+        && data.sourceType is string && data.sourceType.size() <= 40
+        && data.sourceType in ['Market Radar', 'Daily Pulse', 'What-If Simulator', 'Peer Playbook', 'Manual']
+        && data.angleCategory is string && data.angleCategory.size() <= 80
+        && data.hypothesis is string && data.hypothesis.size() >= 1 && data.hypothesis.size() <= 1500
+        && data.actionPlan is string && data.actionPlan.size() <= 1500
+        && data.status is string && data.status.size() <= 30
+        && data.status in ['Planned', 'In Progress', 'Succeeded']
+        && data.howImplemented is string && data.howImplemented.size() <= 2000
+        && data.actualResult is string && data.actualResult.size() <= 300
+        && data.sharedAnonymously is bool
+        && data.publishedPlaybookId is string && data.publishedPlaybookId.size() <= 128
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidSharedPlaybook(data) {
+      return data.keys().hasAll([
+          'authorUid', 'isAnonymized', 'category', 'priceTier',
+          'strategySummary', 'implementationSteps', 'verifiedResult',
+          'channel', 'createdAt'
+        ])
+        && data.keys().hasOnly([
+          'authorUid', 'isAnonymized', 'category', 'priceTier',
+          'strategySummary', 'implementationSteps', 'verifiedResult',
+          'channel', 'createdAt'
+        ])
+        && data.authorUid is string && data.authorUid.size() >= 1 && data.authorUid.size() <= 128
+        && data.authorUid.matches('^[a-zA-Z0-9_\\-]+$')
+        && data.authorUid == request.auth.uid
+        && data.isAnonymized is bool && data.isAnonymized == true
+        && data.category is string && data.category.size() >= 1 && data.category.size() <= 100
+        && data.priceTier is string && data.priceTier.size() <= 50
+        && data.priceTier in ['Mass (Under ₹499)', 'Mid-Premium (₹500–₹1,499)', 'Luxury (₹1,500+)']
+        && data.strategySummary is string && data.strategySummary.size() >= 1 && data.strategySummary.size() <= 450
+        && data.implementationSteps is list
+        && data.implementationSteps.size() >= 1 && data.implementationSteps.size() <= 6
+        && data.implementationSteps[0] is string
+        && data.implementationSteps[0].size() >= 1 && data.implementationSteps[0].size() <= 300
+        && data.verifiedResult is string && data.verifiedResult.size() >= 1 && data.verifiedResult.size() <= 180
+        && data.channel is string && data.channel.size() >= 1 && data.channel.size() <= 100
+        && data.createdAt is timestamp;
+    }
+
+    // --- Collection Rules ---
+
+    // Private User Account
+    match /users/{userId} {
+      allow get: if isOwner(userId) && isValidId(userId);
+      allow list: if false;
+      allow create: if isVerified()
+        && isOwner(userId)
+        && isValidId(userId)
+        && isValidUserAccount(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerified()
+        && isOwner(userId)
+        && isValidId(userId)
+        && isValidUserAccount(incoming())
+        && incoming().uid == existing().uid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'preferredLanguage', 'updatedAt']);
+      allow delete: if false;
+
+      // Private Business DNA Subcollection
+      match /business_dna/{dnaId} {
+        allow get: if isOwner(userId) && isValidId(dnaId);
+        allow list: if isOwner(userId) && existing().ownerId == request.auth.uid;
+        allow create: if isVerified()
+          && isOwner(userId)
+          && isValidId(dnaId)
+          && isValidBusinessDna(incoming())
+          && incoming().createdAt == request.time
+          && incoming().updatedAt == request.time;
+        allow update: if isVerified()
+          && isOwner(userId)
+          && isValidId(dnaId)
+          && isValidBusinessDna(incoming())
+          && incoming().ownerId == existing().ownerId
+          && incoming().createdAt == existing().createdAt
+          && incoming().updatedAt == request.time
+          && incoming().diff(existing()).affectedKeys().hasOnly([
+            'brandName', 'category', 'productDescription', 'targetAudience',
+            'aovInr', 'grossMarginPct', 'monthlyAdBudgetInr', 'competitorOne',
+            'competitorTwo', 'preferredLanguage', 'updatedAt'
+          ]);
+        allow delete: if isVerified() && isOwner(userId) && isValidId(dnaId);
+      }
+
+      // Private Outcome Ledger Subcollection
+      match /outcome_ledger/{entryId} {
+        allow get: if isOwner(userId) && isValidId(entryId);
+        allow list: if isOwner(userId) && existing().ownerId == request.auth.uid;
+        allow create: if isVerified()
+          && isOwner(userId)
+          && isValidId(entryId)
+          && isValidOutcomeLedgerEntry(incoming())
+          && incoming().createdAt == request.time
+          && incoming().updatedAt == request.time;
+        allow update: if isVerified()
+          && isOwner(userId)
+          && isValidId(entryId)
+          && isValidOutcomeLedgerEntry(incoming())
+          && !(existing().status == 'Succeeded' && existing().sharedAnonymously == true)
+          && incoming().ownerId == existing().ownerId
+          && incoming().createdAt == existing().createdAt
+          && incoming().updatedAt == request.time
+          && (
+            // Action 1: Update status or action plan (before anonymous publication)
+            (
+              incoming().sharedAnonymously == existing().sharedAnonymously
+              && incoming().publishedPlaybookId == existing().publishedPlaybookId
+              && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'actionPlan', 'updatedAt'])
+            )
+            ||
+            // Action 2: Record verified outcome and optionally publish anonymized playbook
+            (
+              incoming().status == 'Succeeded'
+              && incoming().howImplemented.size() >= 1
+              && incoming().actualResult.size() >= 1
+              && incoming().diff(existing()).affectedKeys().hasOnly([
+                'status', 'howImplemented', 'actualResult',
+                'sharedAnonymously', 'publishedPlaybookId', 'updatedAt'
+              ])
+            )
+          );
+        allow delete: if isVerified()
+          && isOwner(userId)
+          && isValidId(entryId)
+          && !(existing().status == 'Succeeded' && existing().sharedAnonymously == true);
+      }
+    }
+
+    // Collective Anonymized Playbook Network
+    match /shared_playbooks/{playbookId} {
+      allow get: if isSignedIn() && isValidId(playbookId) && existing().isAnonymized == true;
+      allow list: if isSignedIn() && existing().isAnonymized == true;
+      allow create: if isVerified()
+        && isValidId(playbookId)
+        && isValidSharedPlaybook(incoming())
+        && incoming().createdAt == request.time;
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}

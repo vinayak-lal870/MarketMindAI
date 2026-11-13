@@ -1,0 +1,6 @@
+{
+  "name": "MarketMind AI — Growth Intelligence for Indian D2C & SMBs",
+  "description": "Autonomous growth intelligence platform for Indian D2C and SMB founders featuring private Business DNA memory, collective anonymized peer playbooks, multilingual voice support, market blind-spot radar, and unit-economics simulation.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
